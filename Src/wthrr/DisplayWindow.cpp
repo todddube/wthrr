@@ -98,7 +98,7 @@ HRESULT DisplayWindow::Initialize(const HINSTANCE hInstance, const MonitorData& 
 
 	if (!GeneralSettings.loaded)
 	{
-		SettingsManager::GetInstance()->ReadSettings(GeneralSettings);
+		SettingsManager::GetInstance().ReadSettings(GeneralSettings);
 	}
 
 	OptionsDialog::SubscribeToChange(this);
@@ -209,7 +209,7 @@ LRESULT DisplayWindow::WndProc(const HWND hWnd, const UINT message, const WPARAM
 			if (pThis->MonitorDat.IsPrimaryDisplay)
 			{
 				// saving settings in config ini file
-				SettingsManager::GetInstance()->WriteSettings(GeneralSettings);
+				SettingsManager::GetInstance().WriteSettings(GeneralSettings);
 				RemoveNotifyIcon(hWnd);
 			}
 			PostQuitMessage(0);
@@ -277,7 +277,7 @@ LRESULT DisplayWindow::WndProc(const HWND hWnd, const UINT message, const WPARAM
 	case WM_CLOSE:
 		ShowWindow(hWnd, SW_HIDE);
 		// saving settings in config ini file
-		SettingsManager::GetInstance()->WriteSettings(GeneralSettings);
+		SettingsManager::GetInstance().WriteSettings(GeneralSettings);
 		return TRUE;
 	case WM_SHOWWINDOW:
 		if (wParam == TRUE) // Window is being shown

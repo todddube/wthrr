@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(msbuild:*)",
+      "Bash(g++:*)",
+      "Bash(find:*)",
+      "Bash(\"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe\" \"/mnt/c/Users/todd/OneDrive/Documents/GitHub/wthrr/Src/wthrr.sln\" -p:Configuration=Release -p:Platform=x64 -verbosity:minimal)",
+      "Bash(\"/mnt/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe\" \"C:\\\\Users\\\\todd\\\\OneDrive\\\\Documents\\\\GitHub\\\\wthrr\\\\Src\\\\wthrr.sln\" /p:Configuration=Release /p:Platform=x64 /verbosity:minimal)",
+      "Bash(rg:*)"
+    ],
+    "deny": []
+  }
+}
