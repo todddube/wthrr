@@ -1,7 +1,12 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\todd\\OneDrive\\Documents\\GitHub\\wthrr\\Src\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{79F81733-C705-49ED-BBAB-0BB5AECAD550}|wthrr\\wthrr.vcxproj|C:\\Users\\todd\\OneDrive\\Documents\\GitHub\\wthrr\\Src\\wthrr\\SettingsManager.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{79F81733-C705-49ED-BBAB-0BB5AECAD550}|wthrr\\wthrr.vcxproj|solutionrelative:wthrr\\SettingsManager.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,8 +14,21 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 0,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "SettingsManager.cpp",
+              "DocumentMoniker": "C:\\Users\\todd\\OneDrive\\Documents\\GitHub\\wthrr\\Src\\wthrr\\SettingsManager.cpp",
+              "RelativeDocumentMoniker": "wthrr\\SettingsManager.cpp",
+              "ToolTip": "C:\\Users\\todd\\OneDrive\\Documents\\GitHub\\wthrr\\Src\\wthrr\\SettingsManager.cpp",
+              "RelativeToolTip": "wthrr\\SettingsManager.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-06-29T21:07:56.515Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
@@ -22,6 +40,10 @@
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{40ea2e6b-2121-4bb8-a43e-c83c04b51041}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{2d7728c2-de0a-45b5-99aa-89b609dfde73}"
             },
             {
               "$type": "Bookmark",
