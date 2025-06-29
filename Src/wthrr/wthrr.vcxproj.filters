@@ -106,7 +106,7 @@
     <Image Include="small.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="let-it-rain.ico">
+    <Image Include="wthrr.ico">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="github.ico">
@@ -114,7 +114,7 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="let-it-rain.rc">
+    <ResourceCompile Include="wthrr.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>

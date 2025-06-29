@@ -65,7 +65,7 @@
         "DisplayName" = "8:Release"
         "IsDebugOnly" = "11:FALSE"
         "IsReleaseOnly" = "11:TRUE"
-        "OutputFilename" = "8:Release\\LetItRainInstaller.msi"
+        "OutputFilename" = "8:Release\\WthrrInstaller.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -187,7 +187,7 @@
         "Product"
         {
         "Name" = "8:Microsoft Visual Studio"
-        "ProductName" = "8:let it rain"
+        "ProductName" = "8:wthrr"
         "ProductCode" = "8:{5CBCEF94-E580-47A6-ABB3-9438BFB46CCF}"
         "PackageCode" = "8:{A78A6D59-FE3D-487B-AFFB-309089FE5AD3}"
         "UpgradeCode" = "8:{25A998DD-A966-4C68-8711-D4FDE362914B}"
@@ -200,7 +200,7 @@
         "Manufacturer" = "8:RYFTools"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
-        "Title" = "8:let it rain installer"
+        "Title" = "8:wthrr installer"
         "Subject" = "8:"
         "ARPCONTACT" = "8:RYFTools"
         "Keywords" = "8:"
@@ -311,7 +311,7 @@
         {
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_AD2CD393D43647719C29A6ECD5B30B29"
             {
-            "Name" = "8:let it rain"
+            "Name" = "8:wthrr"
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"

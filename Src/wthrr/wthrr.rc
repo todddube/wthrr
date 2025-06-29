@@ -111,7 +111,7 @@ END
 
 STRINGTABLE
 BEGIN
-    IDS_APP_TITLE           "let-it-rain"
+    IDS_APP_TITLE           "wthrr"
     IDC_RAINCPPDXGI         "RAINCPPDXGI"
 END
 
@@ -161,10 +161,10 @@ BEGIN
             VALUE "CompanyName", "RYF TOOLS"
             VALUE "FileDescription", "Rain simulator for Windows desktop"
             VALUE "FileVersion", "1.0.0.0"
-            VALUE "InternalName", "let-it-rain.exe"
+            VALUE "InternalName", "wthrr.exe"
             VALUE "LegalCopyright", "Copyright (C) 2024"
-            VALUE "OriginalFilename", "let-it-rain.exe"
-            VALUE "ProductName", "let-it-rain"
+            VALUE "OriginalFilename", "wthrr.exe"
+            VALUE "ProductName", "wthrr"
             VALUE "ProductVersion", "1.0.0.0"
         END
     END

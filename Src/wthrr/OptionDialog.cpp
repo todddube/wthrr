@@ -286,7 +286,7 @@ LRESULT CALLBACK OptionsDialog::DialogProc(const HWND hWnd, const UINT message, 
 				
 			case IDC_BUTTON_GITHUB:
 				// Open GitHub repository in browser
-				ShellExecute(nullptr, L"open", L"https://github.com/todddube/RainProject", 
+				ShellExecute(nullptr, L"open", L"https://github.com/todddube/wthrr", 
 					nullptr, nullptr, SW_SHOWNORMAL);
 				break;
 				
