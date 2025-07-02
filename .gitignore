@@ -1,4 +1,12 @@
 /Src/.vs
-/Src/.vs
-/Src/.vs
-/Src/.vs
+
+# Go artifacts
+/cmd/wthrr/wthrr
+/cmd/wthrr/wthrr.exe
+*.tar.gz
+*.zip
+/dist/
+go.sum
+
+# Build artifacts
+/artifacts/

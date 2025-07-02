@@ -1,0 +1,118 @@
+---
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build and Release
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            os: linux
+          - goos: darwin
+            goarch: amd64
+            os: macos
+          - goos: windows
+            goarch: amd64
+            os: windows
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: Get version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 0
+        run: |
+          BINARY_NAME=wthrr
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            BINARY_NAME=wthrr.exe
+          fi
+
+          go build \
+            -ldflags="-X main.version=${{ steps.version.outputs.VERSION }} \
+            -w -s" \
+            -o ${BINARY_NAME} ./cmd/wthrr
+
+          # Create archive
+          OS_VAR="${{ matrix.os }}"
+          ARCH_VAR="${{ matrix.goarch }}"
+          ARCHIVE_NAME=wthrr_${VERSION_VAR}_${OS_VAR}_${ARCH_VAR}
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            zip ${ARCHIVE_NAME}.zip ${BINARY_NAME}
+            echo "ASSET=${ARCHIVE_NAME}.zip" >> $GITHUB_ENV
+          else
+            tar -czf ${ARCHIVE_NAME}.tar.gz ${BINARY_NAME}
+            echo "ASSET=${ARCHIVE_NAME}.tar.gz" >> $GITHUB_ENV
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.ASSET }}
+          path: ${{ env.ASSET }}
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: ./artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.VERSION }}
+          name: Release ${{ steps.version.outputs.VERSION }}
+          body: |
+            ## Changes in ${{ steps.version.outputs.VERSION }}
+
+            ### Downloads
+            - **Linux (amd64)**:
+              `wthrr_${{ steps.version.outputs.VERSION }}_linux_amd64.tar.gz`
+            - **macOS (amd64)**:
+              `wthrr_${{ steps.version.outputs.VERSION }}_macos_amd64.tar.gz`
+            - **Windows (amd64)**:
+              `wthrr_${{ steps.version.outputs.VERSION }}_windows_amd64.zip`
+
+            ### Installation
+            1. Download the appropriate archive for your platform
+            2. Extract the binary
+            3. Run `./wthrr` (or `wthrr.exe` on Windows)
+
+          files: ./artifacts/*/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
