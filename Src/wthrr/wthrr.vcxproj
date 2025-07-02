@@ -212,6 +212,7 @@
     <ClInclude Include="MathUtil.h" />
     <ClInclude Include="OptionDialog.h" />
     <ClInclude Include="DisplayWindow.h" />
+    <ClInclude Include="Puddle.h" />
     <ClInclude Include="RainDrop.h" />
     <ClInclude Include="RainDrop_Modern.h" />
     <ClInclude Include="SnowFlake.h" />
@@ -229,6 +230,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="OptionDialog.cpp" />
     <ClCompile Include="DisplayWindow.cpp" />
+    <ClCompile Include="Puddle.cpp" />
     <ClCompile Include="RainDrop.cpp" />
     <ClCompile Include="SnowFlake.cpp" />
     <ClCompile Include="Splatter.cpp" />

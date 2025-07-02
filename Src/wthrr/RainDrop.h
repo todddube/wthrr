@@ -2,10 +2,14 @@
 #include <vector>
 #include <memory>
 #include <array>
+#include <functional>
 
 #include "DisplayData.h"
 #include "Splatter.h"
 #include "Vector2.h"
+
+// Define a type for notification callbacks
+using RainDropHitGroundCallback = std::function<void(const Vector2&)>;
 
 // RainDrop Class
 class RainDrop
@@ -19,6 +23,9 @@ public:
 
 	void UpdatePosition(float deltaSeconds) noexcept;
 	void Draw(ID2D1DeviceContext* dc) const noexcept;
+	
+	// New method to set the callback
+	void SetHitGroundCallback(RainDropHitGroundCallback callback) noexcept;
 
 private:
 	static constexpr int MAX_SPLUTTER_FRAME_COUNT_ = 50;
@@ -43,6 +50,7 @@ private:
 	int CurrentFrameCountForSplatter = 0;
 
 	std::vector<std::unique_ptr<Splatter>> Splatters;
+	RainDropHitGroundCallback HitGroundCallback;  // New callback
 
 	void Initialize() noexcept;
 	void CreateSplatters() noexcept;

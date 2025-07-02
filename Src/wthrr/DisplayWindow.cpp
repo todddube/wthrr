@@ -116,6 +116,9 @@ HRESULT DisplayWindow::Initialize(const HINSTANCE hInstance, const MonitorData& 
 	pDisplaySpecificData = new DisplayData(Dc.Get());
 	pDisplaySpecificData->SetRainColor(GeneralSettings.ParticleColor);
 	HandleWindowBoundsChange(window, false);
+
+	// Initialize puddle manager
+	pPuddleManager = std::make_unique<PuddleManager>(pDisplaySpecificData);
 	
 	// Initialize snow wind system with default values
 	CurrentSnowWindDirection = 0.0f;
@@ -627,6 +630,11 @@ void DisplayWindow::HandleWindowBoundsChange(const HWND window, const bool clear
 		std::wstring logMessage = oss.str();
 		OutputDebugStringW(logMessage.c_str());
 	}
+
+	if (pPuddleManager && clearDrops)
+	{
+		pPuddleManager->Reset();
+	}
 }
 
 void DisplayWindow::HandleTaskBarChange() const
@@ -777,6 +785,12 @@ void DisplayWindow::DrawRainDrops() const
 	{
 		pDrop->Draw(Dc.Get());
 	}
+    
+    // Draw puddles if we're in rain mode
+    if (pPuddleManager)
+    {
+        pPuddleManager->Draw(Dc.Get());
+    }
 
 	HR(Dc->EndDraw());
 	// Make the swap chain available to the composition engine
@@ -815,6 +829,12 @@ void DisplayWindow::UpdateRainDrops(const float deltaTime)
 		pDrop->UpdatePosition(deltaTime); // Use proper delta time
 	}
 
+    // Update puddles with the same time delta
+    if (pPuddleManager)
+    {
+        pPuddleManager->Update(deltaTime);
+    }
+
 	// Remove all raindrops that have expired
 	for (auto pDropIterator = RainDrops.begin(); pDropIterator != RainDrops.end();)
 	{
@@ -845,6 +865,10 @@ void DisplayWindow::UpdateRainDrops(const float deltaTime)
 	for (int i = 0; i < noOfDropsToGenerate; ++i)
 	{
 		RainDrop* pDrop = new RainDrop(GeneralSettings.WindSpeed, pDisplaySpecificData);
+		// Set the callback for puddle creation
+		pDrop->SetHitGroundCallback([this](const Vector2& pos) {
+			NotifyRainDropHitGround(pos);
+		});
 		RainDrops.push_back(pDrop);
 	}
 }
@@ -907,6 +931,7 @@ DisplayWindow* DisplayWindow::GetInstanceFromHwnd(const HWND hWnd)
 DisplayWindow::~DisplayWindow()
 {
 	delete pDisplaySpecificData;
+	// The pPuddleManager is automatically cleaned up by the unique_ptr
 }
 
 void DisplayWindow::UpdateLightning()
@@ -1011,5 +1036,14 @@ void DisplayWindow::UpdateZOrder(HWND hWnd)
         // Immediately undo the topmost status to allow other windows to go above us when activated
         SetWindowPos(hWnd, HWND_NOTOPMOST, 0, 0, 0, 0, 
             SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+    }
+}
+
+void DisplayWindow::NotifyRainDropHitGround(const Vector2& position)
+{
+    // Only proceed if we have a valid puddle manager
+    if (pPuddleManager)
+    {
+        pPuddleManager->CreateOrAddToPuddle(position);
     }
 }

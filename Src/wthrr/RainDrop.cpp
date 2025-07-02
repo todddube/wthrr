@@ -10,7 +10,7 @@
 #include "RandomGenerator.h"
 
 RainDrop::RainDrop(const int windDirectionFactor, DisplayData* pDispData) noexcept
-	: pDisplayData(pDispData), WindDirectionFactor(windDirectionFactor)
+	: pDisplayData(pDispData), WindDirectionFactor(windDirectionFactor), HitGroundCallback(nullptr)
 {
 	Splatters.reserve(MAX_SPLATTER_PER_RAINDROP_);
 	Initialize();
@@ -54,6 +54,11 @@ bool RainDrop::IsReadyForErase() const noexcept
 	return IsDead;
 }
 
+void RainDrop::SetHitGroundCallback(RainDropHitGroundCallback callback) noexcept
+{
+    HitGroundCallback = callback;
+}
+
 void RainDrop::UpdatePosition(const float deltaSeconds) noexcept
 {
 	if (IsDead) return;
@@ -73,6 +78,12 @@ void RainDrop::UpdatePosition(const float deltaSeconds) noexcept
 			{
 				// if the rain touched ground inside bounds, create splatter.
 				CreateSplatters();
+				
+				// Notify about the raindrop hitting the ground
+				if (HitGroundCallback)
+                {
+                    HitGroundCallback(Pos);
+                }
 			}
 			else
 			{

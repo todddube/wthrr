@@ -1,0 +1,32 @@
+﻿  Main.cpp
+C:\Users\todd\OneDrive\Documents\GitHub\wthrr\Src\wthrr\Global.h(4,86): warning C4100: 'lprcMonitor': unreferenced parameter
+  (compiling source file 'Main.cpp')
+  
+C:\Users\todd\OneDrive\Documents\GitHub\wthrr\Src\wthrr\Global.h(4,67): warning C4100: 'hdcMonitor': unreferenced parameter
+  (compiling source file 'Main.cpp')
+  
+  DisplayWindow.cpp
+C:\Users\todd\OneDrive\Documents\GitHub\wthrr\Src\wthrr\Global.h(4,86): warning C4100: 'lprcMonitor': unreferenced parameter
+  (compiling source file 'DisplayWindow.cpp')
+  
+C:\Users\todd\OneDrive\Documents\GitHub\wthrr\Src\wthrr\Global.h(4,67): warning C4100: 'hdcMonitor': unreferenced parameter
+  (compiling source file 'DisplayWindow.cpp')
+  
+C:\Users\todd\OneDrive\Documents\GitHub\wthrr\Src\wthrr\DisplayWindow.cpp(117,24): warning C4834: discarding return value of function with [[nodiscard]] attribute
+C:\Users\todd\OneDrive\Documents\GitHub\wthrr\Src\wthrr\DisplayWindow.cpp(149,24): warning C4834: discarding return value of function with [[nodiscard]] attribute
+C:\Users\todd\OneDrive\Documents\GitHub\wthrr\Src\wthrr\DisplayWindow.cpp(344,20): warning C4305: 'argument': truncation from 'const double' to 'float'
+C:\Users\todd\OneDrive\Documents\GitHub\wthrr\Src\wthrr\DisplayWindow.cpp(351,20): warning C4305: 'argument': truncation from 'const double' to 'float'
+C:\Users\todd\OneDrive\Documents\GitHub\wthrr\Src\wthrr\DisplayWindow.cpp(354,21): warning C4305: 'argument': truncation from 'const double' to 'float'
+C:\Users\todd\OneDrive\Documents\GitHub\wthrr\Src\wthrr\DisplayWindow.cpp(621,25): warning C4834: discarding return value of function with [[nodiscard]] attribute
+C:\Users\todd\OneDrive\Documents\GitHub\wthrr\Src\wthrr\DisplayWindow.cpp(609,57): warning C4100: 'window': unreferenced parameter
+C:\Users\todd\OneDrive\Documents\GitHub\wthrr\Src\wthrr\DisplayWindow.cpp(647,25): warning C4834: discarding return value of function with [[nodiscard]] attribute
+C:\Users\todd\OneDrive\Documents\GitHub\wthrr\Src\wthrr\DisplayWindow.cpp(880,70): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\todd\OneDrive\Documents\GitHub\wthrr\Src\wthrr\DisplayWindow.cpp(880,33): warning C4267: 'initializing': conversion from 'size_t' to 'const int', possible loss of data
+  Puddle.cpp
+  RainDrop.cpp
+  Generating code
+  240 of 1618 functions (14.8%) were compiled, the rest were copied from previous compilation.
+    182 functions were new in current compilation
+    118 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  wthrr.vcxproj -> C:\Users\todd\OneDrive\Documents\GitHub\wthrr\Src\wthrr\x64\Release\wthrr.exe

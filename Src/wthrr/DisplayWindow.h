@@ -13,6 +13,7 @@
 #include "OptionDialog.h"
 #include "SettingsManager.h"
 #include "SnowFlake.h"
+#include "Puddle.h"  // Include the new Puddle header
 
 // https://docs.microsoft.com/en-us/archive/msdn-magazine/2014/june/windows-with-c-high-performance-window-layering-using-the-windows-composition-engine
 
@@ -72,6 +73,7 @@ private:
 
 	std::vector<RainDrop*> RainDrops;
 	std::vector<SnowFlake*> SnowFlakes;
+	std::unique_ptr<PuddleManager> pPuddleManager;  // Added puddle manager
 
 	// For animation
 	double CurrentTime = -1.0;
@@ -126,6 +128,9 @@ private:
 	// Snow wind methods
 	void UpdateSnowWind(float deltaTime);
 	float GetCurrentSnowWindFactor() const;
+
+	// Puddle notifications
+	void NotifyRainDropHitGround(const Vector2& position); // Method to inform puddle system about raindrops
 
 	static void SetInstanceToHwnd(HWND hWnd, LPARAM lParam);
 	static DisplayWindow* GetInstanceFromHwnd(HWND hWnd);
