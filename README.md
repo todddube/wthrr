@@ -2,7 +2,7 @@
 
 **An immersive Windows desktop weather simulation** that brings realistic rain and snow effects to your screen with stunning visual fidelity and ASMR-inspired atmospheric ambiance.
 
-![wthrr Demo](https://img.shields.io/badge/Platform-Windows%2010%2F11-blue?style=flat-square)
+![wthrr Demo](https://img.shields.io/badge/Platform-Windows%2011+-blue?style=flat-square)
 ![Version](https://img.shields.io/badge/Version-2.0.3-green?style=flat-square)
 ![License](https://img.shields.io/badge/License-Copyright%20RYF%20TOOLS-red?style=flat-square)
 
@@ -48,7 +48,7 @@ Built with **modern C++20** standards and cutting-edge Windows APIs:
 
 | Requirement | Specification |
 |-------------|---------------|
-| **OS** | Windows 10 (1903+) / Windows 11 |
+| **OS** | Windows 11 or higher |
 | **Graphics** | DirectX 11.2 compatible GPU |
 | **Memory** | 50MB RAM typical usage |
 | **CPU** | Any modern processor (Intel/AMD) |
@@ -62,7 +62,8 @@ Built with **modern C++20** standards and cutting-edge Windows APIs:
 3. Run installer with administrator privileges
 4. Launch from Start Menu or desktop shortcut
 
-### Option 2: Build from Source# Prerequisites: Visual Studio 2022 with C++20 support
+### Option 2: Build from Source
+# Prerequisites: Visual Studio 2022 with C++20 support and Windows 11 SDK (22000.0+)
 git clone https://github.com/yourusername/wthrr.git
 cd wthrr/Src
 msbuild wthrr.sln /p:Configuration=Release /p:Platform=x64

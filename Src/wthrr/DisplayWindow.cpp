@@ -483,7 +483,7 @@ void DisplayWindow::InitNotifyIcon(const HWND hWnd)
 	NOTIFYICONDATA nid = {sizeof(nid)};
 	nid.hWnd = hWnd;
 
-	// NIF_GUID and nid.guidItem doesn't work properly in Windows 10.
+	// NIF_GUID and nid.guidItem doesn't work properly in Windows 10 and earlier.
 	// So used .uID parameter without NIF_GUID flag.
 	nid.uFlags = NIF_ICON | NIF_TIP | NIF_MESSAGE | NIF_SHOWTIP; // | NIF_GUID;
 	//nid.guidItem = __uuidof(RainIcon); 
