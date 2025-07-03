@@ -1,6 +1,9 @@
+/////////////////////////////////////////////////////////////////////////////
 // Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
+#include "VersionRC.h"  // Single source of truth for all version information
+
 /////////////////////////////////////////////////////////////////////////////
 // English (United States) resources
 
@@ -27,7 +30,7 @@ IDI_SMALL               ICON                    "small.ico"
 
 IDD_DIALOGB DIALOGEX 0, 0, 299, 410
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "wthrr [v 2.0.3] - options"
+CAPTION WTHRR_DIALOG_CAPTION
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     LTEXT           "No of Rain Drops / Snow Flakes",IDC_STATIC,10,43,122,8
@@ -111,7 +114,7 @@ END
 
 STRINGTABLE
 BEGIN
-    IDS_APP_TITLE           "wthrr"
+    IDS_APP_TITLE           WTHRR_APP_NAME
     IDC_RAINCPPDXGI         "RAINCPPDXGI"
 END
 
@@ -142,8 +145,8 @@ IDI_GITHUB_ICON         ICON                    "github.ico"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,0
- PRODUCTVERSION 1,0,0,0
+ FILEVERSION WTHRR_VERSION_MAJOR,WTHRR_VERSION_MINOR,WTHRR_VERSION_PATCH,WTHRR_VERSION_BUILD
+ PRODUCTVERSION WTHRR_VERSION_MAJOR,WTHRR_VERSION_MINOR,WTHRR_VERSION_PATCH,WTHRR_VERSION_BUILD
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -158,14 +161,14 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName", "RYF TOOLS"
-            VALUE "FileDescription", "Rain simulator for Windows desktop"
-            VALUE "FileVersion", "1.0.0.0"
-            VALUE "InternalName", "wthrr.exe"
-            VALUE "LegalCopyright", "Copyright (C) 2024"
-            VALUE "OriginalFilename", "wthrr.exe"
-            VALUE "ProductName", "wthrr"
-            VALUE "ProductVersion", "1.0.0.0"
+            VALUE "CompanyName", WTHRR_COMPANY_NAME
+            VALUE "FileDescription", WTHRR_DESCRIPTION
+            VALUE "FileVersion", WTHRR_VERSION_FULL
+            VALUE "InternalName", WTHRR_APP_NAME ".exe"
+            VALUE "LegalCopyright", WTHRR_COPYRIGHT
+            VALUE "OriginalFilename", WTHRR_APP_NAME ".exe"
+            VALUE "ProductName", WTHRR_APP_NAME
+            VALUE "ProductVersion", WTHRR_VERSION_FULL
         END
     END
     BLOCK "VarFileInfo"

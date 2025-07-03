@@ -1,5 +1,6 @@
 #include "DisplayWindow.h"
 #include "Global.h"
+#include "Version.h"  // Include centralized version information
 #include <chrono>
 #include <thread> // Add thread header for sleep_for
 
@@ -36,6 +37,11 @@ int WINAPI WinMain(
     HeapSetInformation(nullptr, HeapEnableTerminationOnCorruption, nullptr, 0);
 
     SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+
+    // Optional: Log version information for debugging
+#ifdef _DEBUG
+    OutputDebugStringA(("wthrr " + wthrr::version::GetVersionWithBuildInfo() + " starting...\n").c_str());
+#endif
 
     std::vector<MonitorData> monitorDataList;
     EnumDisplayMonitors(nullptr, nullptr, MonitorEnumProc, reinterpret_cast<LPARAM>(&monitorDataList));
