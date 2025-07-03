@@ -22,6 +22,6 @@
 #define WTHRR_COPYRIGHT         "Copyright (C) 2025 Todd Dube"
 
 // Dialog caption with version - AUTOMATICALLY MAINTAINED BY SCRIPTS
-#define WTHRR_DIALOG_CAPTION    "wthrr [v 0.0.0] - options"
+#define WTHRR_DIALOG_CAPTION    "wthrr [v 2.0.4] - options"
 
 #endif // WTHRR_VERSION_RC_H

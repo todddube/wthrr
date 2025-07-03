@@ -1,6 +1,6 @@
 #include "DisplayWindow.h"
 #include "Global.h"
-#include "Version.h"  // Include centralized version information
+#include "VersionRC.h"  // Single source of truth for version information
 #include <chrono>
 #include <thread> // Add thread header for sleep_for
 
@@ -40,7 +40,7 @@ int WINAPI WinMain(
 
     // Optional: Log version information for debugging
 #ifdef _DEBUG
-    OutputDebugStringA(("wthrr " + wthrr::version::GetVersionWithBuildInfo() + " starting...\n").c_str());
+    OutputDebugStringA(("wthrr " WTHRR_VERSION_STRING " (built " __DATE__ " " __TIME__ ") starting...\n"));
 #endif
 
     std::vector<MonitorData> monitorDataList;

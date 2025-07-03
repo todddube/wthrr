@@ -1,4 +1,4 @@
-# PowerShell script to update version numbers - Single Source System
+# PowerShell script to update version numbers - Single Source System (Option 2)
 # Usage: .\update-version.ps1 -Major 2 -Minor 1 -Patch 0 [-Build 0]
 
 param(
@@ -18,9 +18,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# File paths - Single source of truth
+# File paths - Single VersionRC.h approach
 $versionRCPath = "wthrr/VersionRC.h"
-$versionHeaderPath = "wthrr/Version.h"  # Only for PreRelease flag
 $readmePath = "../README.md"
 
 # Validate version numbers
@@ -34,47 +33,42 @@ $fullVersionString = "$Major.$Minor.$Patch.$Build"
 $dialogCaption = "wthrr [v $versionString] - options"
 
 Write-Host "?? Updating wthrr to version $versionString" -ForegroundColor Green
-Write-Host "   Single-source versioning system" -ForegroundColor Cyan
+Write-Host "   Using Option 2: Single VersionRC.h system" -ForegroundColor Cyan
 
-# Update VersionRC.h (Single Source of Truth)
-if (Test-Path $versionRCPath) {
-    $content = Get-Content $versionRCPath -Raw
-    
-    # Update version number components
-    $content = $content -replace '#define WTHRR_VERSION_MAJOR\s+\d+', "#define WTHRR_VERSION_MAJOR     $Major"
-    $content = $content -replace '#define WTHRR_VERSION_MINOR\s+\d+', "#define WTHRR_VERSION_MINOR     $Minor"
-    $content = $content -replace '#define WTHRR_VERSION_PATCH\s+\d+', "#define WTHRR_VERSION_PATCH     $Patch"
-    $content = $content -replace '#define WTHRR_VERSION_BUILD\s+\d+', "#define WTHRR_VERSION_BUILD     $Build"
-    
-    # Update derived version strings
-    $content = $content -replace '#define WTHRR_VERSION_STRING\s+"[^"]+"', "#define WTHRR_VERSION_STRING    `"$versionString`""
-    $content = $content -replace '#define WTHRR_VERSION_FULL\s+"[^"]+"', "#define WTHRR_VERSION_FULL      `"$fullVersionString`""
-    
-    # Update dialog caption
-    $content = $content -replace '#define WTHRR_DIALOG_CAPTION\s+"[^"]+"', "#define WTHRR_DIALOG_CAPTION    `"$dialogCaption`""
-    
-    Set-Content $versionRCPath $content -NoNewline
-    Write-Host "? Updated $versionRCPath (single source of truth)" -ForegroundColor Green
-} else {
-    Write-Error "VersionRC.h not found at $versionRCPath"
-    exit 1
-}
+# Create VersionRC.h content directly with proper UTF-8 encoding
+$versionRCContent = @"
+// VersionRC.h - Single Source of Truth for All Version Information
+// This file contains only C preprocessor definitions compatible with both 
+// the resource compiler and C++ code
 
-# Update PreRelease flag in Version.h only (if it exists)
-if ((Test-Path $versionHeaderPath) -and ($PreRelease.IsPresent -or $PSBoundParameters.ContainsKey('PreRelease'))) {
-    $versionContent = Get-Content $versionHeaderPath -Raw
-    
-    if ($PreRelease) {
-        $versionContent = $versionContent -replace 'return false; // Set to true for beta/alpha versions', 'return true; // Set to true for beta/alpha versions'
-        Write-Host "? Marked as pre-release version" -ForegroundColor Yellow
-    } else {
-        $versionContent = $versionContent -replace 'return true; // Set to true for beta/alpha versions', 'return false; // Set to true for beta/alpha versions'
-        Write-Host "? Marked as stable release" -ForegroundColor Green
-    }
-    
-    Set-Content $versionHeaderPath $versionContent -NoNewline
-    Write-Host "? Updated $versionHeaderPath (PreRelease flag)" -ForegroundColor Green
-}
+#ifndef WTHRR_VERSION_RC_H
+#define WTHRR_VERSION_RC_H
+
+// Version number components - UPDATE THESE FOR NEW RELEASES
+#define WTHRR_VERSION_MAJOR     $Major
+#define WTHRR_VERSION_MINOR     $Minor
+#define WTHRR_VERSION_PATCH     $Patch
+#define WTHRR_VERSION_BUILD     $Build
+
+// Derived version strings - AUTOMATICALLY MAINTAINED BY SCRIPTS
+#define WTHRR_VERSION_STRING    "$versionString"
+#define WTHRR_VERSION_FULL      "$fullVersionString"
+
+// Application information
+#define WTHRR_APP_NAME          "wthrr"
+#define WTHRR_COMPANY_NAME      "Todd Dube"
+#define WTHRR_DESCRIPTION       "Immersive desktop weather simulation for Windows"
+#define WTHRR_COPYRIGHT         "Copyright (C) 2025 Todd Dube"
+
+// Dialog caption with version - AUTOMATICALLY MAINTAINED BY SCRIPTS
+#define WTHRR_DIALOG_CAPTION    "$dialogCaption"
+
+#endif // WTHRR_VERSION_RC_H
+"@
+
+# Write the VersionRC.h file with UTF-8 encoding (no BOM for RC compiler compatibility)
+[System.IO.File]::WriteAllText((Resolve-Path $versionRCPath), $versionRCContent, [System.Text.UTF8Encoding]::new($false))
+Write-Host "? Updated $versionRCPath (single source of truth)" -ForegroundColor Green
 
 # Update README.md version badge
 if (Test-Path $readmePath) {
@@ -84,6 +78,15 @@ if (Test-Path $readmePath) {
     Write-Host "? Updated README.md version badge" -ForegroundColor Green
 } else {
     Write-Warning "README.md not found at $readmePath"
+}
+
+# Check if Version.h exists and recommend removal
+$versionHeaderPath = "wthrr/Version.h"
+if (Test-Path $versionHeaderPath) {
+    Write-Host "`n??  Option 2 Implementation Note:" -ForegroundColor Yellow
+    Write-Host "   Version.h still exists but is no longer needed" -ForegroundColor Yellow
+    Write-Host "   Your code now uses VersionRC.h directly for true single-source versioning" -ForegroundColor Yellow
+    Write-Host "   You can safely delete Version.h to complete the migration" -ForegroundColor Yellow
 }
 
 # Verify the changes
@@ -96,12 +99,22 @@ Write-Host "   Pre-release: $(if ($PreRelease) { 'Yes' } else { 'No' })" -Foregr
 Write-Host "`n?? Version update complete!" -ForegroundColor Green
 Write-Host "?? Files updated:" -ForegroundColor Yellow
 Write-Host "   • VersionRC.h (single source of truth)" -ForegroundColor White
-if (Test-Path $versionHeaderPath) { Write-Host "   • Version.h (PreRelease flag only)" -ForegroundColor White }
 if (Test-Path $readmePath) { Write-Host "   • README.md (version badge)" -ForegroundColor White }
 
 Write-Host "`n?? Next steps:" -ForegroundColor Yellow
 Write-Host "1. Build and test: msbuild wthrr.sln /p:Configuration=Release" -ForegroundColor White
-Write-Host "2. Verify version appears correctly in application" -ForegroundColor White
-Write-Host "3. Commit changes: git add . && git commit -m `"Release v$versionString`"" -ForegroundColor White
-Write-Host "4. Create tag: git tag -a v$versionString -m `"Release v$versionString`"" -ForegroundColor White
-Write-Host "5. Push changes: git push origin main --tags" -ForegroundColor White
+Write-Host "2. Verify version appears correctly in:" -ForegroundColor White
+Write-Host "   - Application file properties (right-click .exe)" -ForegroundColor Gray
+Write-Host "   - Options dialog title bar" -ForegroundColor Gray
+Write-Host "   - Debug output (if enabled)" -ForegroundColor Gray
+Write-Host "3. Optional: Remove Version.h to complete single-source migration" -ForegroundColor White
+Write-Host "4. Commit changes: git add . && git commit -m `"Release v$versionString`"" -ForegroundColor White
+Write-Host "5. Create tag: git tag -a v$versionString -m `"Release v$versionString`"" -ForegroundColor White
+Write-Host "6. Push changes: git push origin main --tags" -ForegroundColor White
+
+Write-Host "`n?? Single-Source Benefits:" -ForegroundColor Cyan
+Write-Host "   ? No duplicate version definitions" -ForegroundColor White
+Write-Host "   ? Works with both C++ code and Resource Compiler" -ForegroundColor White
+Write-Host "   ? Automatic dialog caption updates" -ForegroundColor White
+Write-Host "   ? Simplified maintenance with this script" -ForegroundColor White
+Write-Host "   ? No file encoding issues" -ForegroundColor White
