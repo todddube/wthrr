@@ -3,6 +3,7 @@
 #include <d2d1.h>
 #include <memory>
 #include <string_view>
+#include <algorithm>  // For std::find
 
 #include "Resource.h"
 
@@ -38,7 +39,11 @@ OptionsDialog::OptionsDialog(const HINSTANCE hInstance,
 void OptionsDialog::SubscribeToChange(CallBackWindow* subscriber)
 {
     if (subscriber != nullptr) {
-	    subscribers.push_back(subscriber);
+        // Check if subscriber is already in the list to avoid duplicates
+        const auto it = std::find(subscribers.begin(), subscribers.end(), subscriber);
+        if (it == std::end(subscribers)) {
+            subscribers.push_back(subscriber);
+        }
     }
 }
 
@@ -115,6 +120,128 @@ void OptionsDialog::UpdateSnowWindControlsState(const HWND hWnd, const bool enab
 	EnableWindow(GetDlgItem(hWnd, IDC_SLIDER_SNOW_WIND_VARIABILITY), enabled);
 }
 
+void OptionsDialog::ShowRainControls(const HWND hWnd, const bool show)
+{
+	const int visibility = show ? SW_SHOW : SW_HIDE;
+	
+	// Rain-specific controls
+	ShowWindow(GetDlgItem(hWnd, IDC_SLIDER2), visibility); // Wind direction
+	ShowWindow(GetDlgItem(hWnd, IDC_SLIDER_LIGHTNING_FREQ), visibility);
+	ShowWindow(GetDlgItem(hWnd, IDC_SLIDER_LIGHTNING_INTENSITY), visibility);
+	
+	// Find and hide/show associated labels for rain controls using EnumChildWindows
+	EnumChildWindows(hWnd, [](HWND hwndChild, LPARAM lParam) -> BOOL {
+		constexpr int MAX_TEXT_LEN = 256;
+		wchar_t text[MAX_TEXT_LEN];
+		const int len = GetWindowText(hwndChild, text, MAX_TEXT_LEN);
+		
+		if (len > 0) {
+			const bool showControl = (lParam != 0);
+			const int controlVisibility = showControl ? SW_SHOW : SW_HIDE;
+			
+			if (wcscmp(text, L"Wind Direction") == 0 ||
+				wcscmp(text, L"Lightning Frequency") == 0 ||
+				wcscmp(text, L"Lightning Intensity") == 0 ||
+				wcscmp(text, L"Left") == 0 ||
+				wcscmp(text, L"Right") == 0 ||
+				wcscmp(text, L"Rare") == 0 ||
+				wcscmp(text, L"Frequent") == 0 ||
+				wcscmp(text, L"Dim") == 0 ||
+				wcscmp(text, L"Bright") == 0) {
+				ShowWindow(hwndChild, controlVisibility);
+			}
+		}
+		return TRUE;
+	}, show ? 1 : 0);
+}
+
+void OptionsDialog::ShowSnowControls(const HWND hWnd, const bool show)
+{
+	const int visibility = show ? SW_SHOW : SW_HIDE;
+	
+	// Snow-specific controls
+	ShowWindow(GetDlgItem(hWnd, IDC_CHECK_SNOW_WIND), visibility);
+	ShowWindow(GetDlgItem(hWnd, IDC_SLIDER_SNOW_WIND_INTENSITY), visibility);
+	ShowWindow(GetDlgItem(hWnd, IDC_SLIDER_SNOW_WIND_VARIABILITY), visibility);
+	
+	// Find and hide/show associated labels for snow controls
+	EnumChildWindows(hWnd, [](HWND hwndChild, LPARAM lParam) -> BOOL {
+		constexpr int MAX_TEXT_LEN = 256;
+		wchar_t text[MAX_TEXT_LEN];
+		const int len = GetWindowText(hwndChild, text, MAX_TEXT_LEN);
+		
+		if (len > 0) {
+			const bool showControl = (lParam != 0);
+			const int controlVisibility = showControl ? SW_SHOW : SW_HIDE;
+			
+			if (wcscmp(text, L"Enable Random Wind for Snow") == 0 ||
+				wcscmp(text, L"Snow Wind Intensity") == 0 ||
+				wcscmp(text, L"Snow Wind Variability") == 0 ||
+				wcscmp(text, L"Mild") == 0 ||
+				wcscmp(text, L"Strong") == 0 ||
+				wcscmp(text, L"Stable") == 0 ||
+				wcscmp(text, L"Gusty") == 0) {
+				ShowWindow(hwndChild, controlVisibility);
+			}
+		}
+		return TRUE;
+	}, show ? 1 : 0);
+}
+
+void OptionsDialog::UpdateControlsVisibilityForWeatherType(const HWND hWnd, const ParticleType weatherType)
+{
+	if (weatherType == RAIN) {
+		ShowRainControls(hWnd, true);
+		ShowSnowControls(hWnd, false);
+		
+		// Update labels for rain mode
+		EnumChildWindows(hWnd, [](HWND hwndChild, LPARAM /*lParam*/) -> BOOL {
+			constexpr int MAX_TEXT_LEN = 256;
+			wchar_t text[MAX_TEXT_LEN];
+			const int len = GetWindowText(hwndChild, text, MAX_TEXT_LEN);
+			
+			if (len > 0) {
+				if (wcscmp(text, L"Color of Rain Drops / Snow Flakes") == 0 ||
+					wcscmp(text, L"Color of Snow Flakes") == 0) {
+					SetWindowText(hwndChild, L"Color of Rain Drops");
+				}
+				else if (wcscmp(text, L"No of Rain Drops / Snow Flakes") == 0 ||
+						 wcscmp(text, L"Number of Snow Flakes") == 0) {
+					SetWindowText(hwndChild, L"Number of Rain Drops");
+				}
+			}
+			return TRUE;
+		}, 0);
+	}
+	else {
+		ShowRainControls(hWnd, false);
+		ShowSnowControls(hWnd, true);
+		
+		// Update labels for snow mode
+		EnumChildWindows(hWnd, [](HWND hwndChild, LPARAM /*lParam*/) -> BOOL {
+			constexpr int MAX_TEXT_LEN = 256;
+			wchar_t text[MAX_TEXT_LEN];
+			const int len = GetWindowText(hwndChild, text, MAX_TEXT_LEN);
+			
+			if (len > 0) {
+				if (wcscmp(text, L"Color of Rain Drops / Snow Flakes") == 0 || 
+					wcscmp(text, L"Color of Rain Drops") == 0) {
+					SetWindowText(hwndChild, L"Color of Snow Flakes");
+				}
+				else if (wcscmp(text, L"No of Rain Drops / Snow Flakes") == 0 ||
+						 wcscmp(text, L"Number of Rain Drops") == 0) {
+					SetWindowText(hwndChild, L"Number of Snow Flakes");
+				}
+			}
+			return TRUE;
+		}, 0);
+		
+		// Update snow wind controls state based on checkbox
+		const bool enableSnowWind = (SendMessage(GetDlgItem(hWnd, IDC_CHECK_SNOW_WIND), BM_GETCHECK, 0, 0) == BST_CHECKED);
+		UpdateSnowWindControlsState(hWnd, enableSnowWind);
+	}
+}
+
 LRESULT CALLBACK OptionsDialog::DialogProc(const HWND hWnd, const UINT message, const WPARAM wParam,
                                            const LPARAM lParam)
 {
@@ -186,29 +313,14 @@ LRESULT CALLBACK OptionsDialog::DialogProc(const HWND hWnd, const UINT message, 
 			if (pThis->PartType == RAIN)
 			{
 				SendMessage(GetDlgItem(hWnd, IDC_RADIO1), BM_SETCHECK, BST_CHECKED, 0);
-				// Enable lightning controls for rain
-				if (hLightningFreqSlider) EnableWindow(hLightningFreqSlider, TRUE);
-				if (hLightningIntensitySlider) EnableWindow(hLightningIntensitySlider, TRUE);
-				
-				// Disable snow wind controls since we're in rain mode
-				if (hEnableSnowWindCheck) EnableWindow(hEnableSnowWindCheck, FALSE);
-				if (hSnowWindIntensitySlider) EnableWindow(hSnowWindIntensitySlider, FALSE);
-				if (hSnowWindVariabilitySlider) EnableWindow(hSnowWindVariabilitySlider, FALSE);
 			}
 			else
 			{
 				SendMessage(GetDlgItem(hWnd, IDC_RADIO2), BM_SETCHECK, BST_CHECKED, 0);
-				// Disable wind direction and lightning sliders for snow
-				EnableWindow(GetDlgItem(hWnd, IDC_SLIDER2), FALSE);
-				if (hLightningFreqSlider) EnableWindow(hLightningFreqSlider, FALSE);
-				if (hLightningIntensitySlider) EnableWindow(hLightningIntensitySlider, FALSE);
-				
-				// Enable snow wind checkbox control
-				if (hEnableSnowWindCheck) EnableWindow(hEnableSnowWindCheck, TRUE);
-				
-				// Set snow wind controls state based on the checkbox
-				UpdateSnowWindControlsState(hWnd, pThis->EnableSnowWind);
 			}
+
+			// Update control visibility based on selected weather type
+			UpdateControlsVisibilityForWeatherType(hWnd, pThis->PartType);
 
 			// Set up GitHub button with icon
 			const HICON hIcon = LoadIcon(pThis->hInstance, MAKEINTRESOURCE(IDI_GITHUB_ICON));
@@ -293,17 +405,8 @@ LRESULT CALLBACK OptionsDialog::DialogProc(const HWND hWnd, const UINT message, 
 			case IDC_RADIO1:
 				if (notificationCode == BN_CLICKED)
 				{
-					// Enable wind direction and lightning sliders for rain
-					EnableWindow(GetDlgItem(hWnd, IDC_SLIDER2), TRUE);
-					EnableWindow(GetDlgItem(hWnd, IDC_SLIDER_LIGHTNING_FREQ), TRUE);
-					EnableWindow(GetDlgItem(hWnd, IDC_SLIDER_LIGHTNING_INTENSITY), TRUE);
-					
-					// Disable snow wind settings for rain
-					EnableWindow(GetDlgItem(hWnd, IDC_CHECK_SNOW_WIND), FALSE);
-					EnableWindow(GetDlgItem(hWnd, IDC_SLIDER_SNOW_WIND_INTENSITY), FALSE);
-					EnableWindow(GetDlgItem(hWnd, IDC_SLIDER_SNOW_WIND_VARIABILITY), FALSE);
-					
 					pThis->PartType = RAIN;
+					UpdateControlsVisibilityForWeatherType(hWnd, RAIN);
 					NotifyParticleTypeChange(pThis->PartType);
 				}
 				break;
@@ -311,19 +414,8 @@ LRESULT CALLBACK OptionsDialog::DialogProc(const HWND hWnd, const UINT message, 
 			case IDC_RADIO2:
 				if (notificationCode == BN_CLICKED)
 				{
-					// Disable wind direction and lightning sliders for snow
-					EnableWindow(GetDlgItem(hWnd, IDC_SLIDER2), FALSE);
-					EnableWindow(GetDlgItem(hWnd, IDC_SLIDER_LIGHTNING_FREQ), FALSE);
-					EnableWindow(GetDlgItem(hWnd, IDC_SLIDER_LIGHTNING_INTENSITY), FALSE);
-					
-					// Enable snow wind checkbox
-					EnableWindow(GetDlgItem(hWnd, IDC_CHECK_SNOW_WIND), TRUE);
-					
-					// Set snow wind controls state based on the checkbox
-					bool enableSnowWind = (SendMessage(GetDlgItem(hWnd, IDC_CHECK_SNOW_WIND), BM_GETCHECK, 0, 0) == BST_CHECKED);
-					UpdateSnowWindControlsState(hWnd, enableSnowWind);
-					
 					pThis->PartType = SNOW;
+					UpdateControlsVisibilityForWeatherType(hWnd, SNOW);
 					NotifyParticleTypeChange(pThis->PartType);
 				}
 				break;
@@ -332,7 +424,7 @@ LRESULT CALLBACK OptionsDialog::DialogProc(const HWND hWnd, const UINT message, 
 				if (notificationCode == BN_CLICKED)
 				{
 					// Snow wind checkbox was clicked
-					bool enabled = (SendMessage(GetDlgItem(hWnd, IDC_CHECK_SNOW_WIND), BM_GETCHECK, 0, 0) == BST_CHECKED);
+					const bool enabled = (SendMessage(GetDlgItem(hWnd, IDC_CHECK_SNOW_WIND), BM_GETCHECK, 0, 0) == BST_CHECKED);
 					pThis->EnableSnowWind = enabled;
 					
 					// Enable/disable snow wind sliders based on checkbox state
@@ -362,11 +454,11 @@ void OptionsDialog::ShowColorChooserDialog(const HWND hWnd)
 	CHOOSECOLOR cc{};
 	cc.lStructSize = sizeof(cc);
 	cc.hwndOwner = hWnd;
-	cc.lpCustColors = static_cast<LPDWORD>(acrCustClr);
+	cc.lpCustColors = acrCustClr;
 	cc.rgbResult = pThis->ParticleColor;
 	cc.Flags = CC_FULLOPEN | CC_RGBINIT;
 
-	if (ChooseColor(&cc))
+	if (ChooseColor(&cc) == TRUE)
 	{
 		pThis->ParticleColor = cc.rgbResult;
 		NotifyParticleColorChange(pThis->ParticleColor);

@@ -34,6 +34,9 @@ private:
 	void CenterDialog() const;
 	static void ShowColorChooserDialog(HWND hWnd);
 	static void UpdateSnowWindControlsState(HWND hWnd, bool enabled);
+	static void ShowRainControls(HWND hWnd, bool show);
+	static void ShowSnowControls(HWND hWnd, bool show);
+	static void UpdateControlsVisibilityForWeatherType(HWND hWnd, ParticleType weatherType);
 	
 	// Member variables
 	static std::vector<CallBackWindow*> subscribers;
