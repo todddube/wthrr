@@ -1,7 +1,14 @@
-﻿  OptionDialog.cpp
+﻿  Main.cpp
+C:\Users\todd\OneDrive\Documents\GitHub\wthrr\Src\wthrr\Global.h(4,86): warning C4100: 'lprcMonitor': unreferenced parameter
+  (compiling source file 'Main.cpp')
+  
+C:\Users\todd\OneDrive\Documents\GitHub\wthrr\Src\wthrr\Global.h(4,67): warning C4100: 'hdcMonitor': unreferenced parameter
+  (compiling source file 'Main.cpp')
+  
+  OptionDialog.cpp
   Generating code
-  3 of 1649 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
+  1 of 1649 functions (<0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    2 functions had inline decision re-evaluated but remain unchanged
+    1 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   wthrr.vcxproj -> C:\Users\todd\OneDrive\Documents\GitHub\wthrr\Src\wthrr\x64\Release\wthrr.exe

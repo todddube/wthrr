@@ -4,6 +4,10 @@
 #include <chrono>
 #include <thread> // Add thread header for sleep_for
 
+// Suppress warnings for Win32 API parameters that may be unused in release builds
+#pragma warning(push)
+#pragma warning(disable: 4100)  // unreferenced formal parameter (common in WinMain for some params)
+
 // Modern C++20 frame rate limiting function
 [[nodiscard]] std::chrono::microseconds calculateSleepTime(
     const std::chrono::high_resolution_clock::time_point& lastFrameTime,
@@ -27,14 +31,14 @@ void sleepFor(const std::chrono::high_resolution_clock::time_point& lastFrameTim
 // Provides the entry point to the application.
 //
 int WINAPI WinMain(
-    const HINSTANCE hInstance,
-    HINSTANCE /*hPrevInstance*/,
-    LPSTR /*lpCmdLine*/,
-    int /*nCmdShow*/)
+    _In_ HINSTANCE hInstance,
+    _In_opt_ HINSTANCE /*hPrevInstance*/,
+    _In_ LPSTR /*lpCmdLine*/,
+    _In_ int /*nCmdShow*/)
 {
     // Ignore the return value because we want to continue running even in the
     // unlikely event that HeapSetInformation fails.
-    HeapSetInformation(nullptr, HeapEnableTerminationOnCorruption, nullptr, 0);
+    static_cast<void>(HeapSetInformation(nullptr, HeapEnableTerminationOnCorruption, nullptr, 0));
 
     SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
@@ -84,3 +88,5 @@ int WINAPI WinMain(
     }
     return 0;
 }
+
+#pragma warning(pop)  // Restore warning settings
