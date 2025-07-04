@@ -1,0 +1,142 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 2.0.4)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  BUILD_CONFIGURATION: Release
+  BUILD_PLATFORM: x64
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v2
+
+    - name: Restore NuGet packages
+      run: nuget restore Src/wthrr.sln
+
+    - name: Build application
+      run: msbuild Src/wthrr.sln /p:Configuration=${{ env.BUILD_CONFIGURATION }} /p:Platform=${{ env.BUILD_PLATFORM }} /p:UseEnv=true
+
+    - name: Run tests (if any)
+      run: |
+        # Add test commands here when you have tests
+        echo "No tests configured yet"
+
+    - name: Create portable package
+      run: |
+        $version = "${{ github.event.inputs.version || github.ref_name }}"
+        $version = $version -replace '^v', ''
+        
+        # Create portable ZIP package
+        $portableDir = "wthrr-v$version-portable"
+        New-Item -ItemType Directory -Path $portableDir -Force
+        
+        Copy-Item "Src/wthrr/x64/Release/wthrr.exe" $portableDir/
+        Copy-Item "README.md" $portableDir/
+        Copy-Item "LICENSE" $portableDir/ -ErrorAction SilentlyContinue
+        
+        # Create release notes
+        @"
+        # wthrr v$version - Portable Edition
+        
+        ## Installation
+        1. Extract all files to a folder of your choice
+        2. Run wthrr.exe
+        3. Right-click the system tray icon to configure
+        
+        ## System Requirements
+        - Windows 10 (1903+) / Windows 11
+        - DirectX 11.2 compatible graphics card
+        
+        ## Support
+        Visit: https://github.com/todddube/wthrr
+        "@ | Out-File -FilePath "$portableDir/README.txt" -Encoding UTF8
+        
+        Compress-Archive -Path $portableDir -DestinationPath "wthrr-v$version-portable.zip"
+        
+        echo "PORTABLE_PACKAGE=wthrr-v$version-portable.zip" >> $env:GITHUB_ENV
+        echo "VERSION=$version" >> $env:GITHUB_ENV
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: wthrr-release-${{ env.VERSION }}
+        path: |
+          Src/wthrr/x64/Release/wthrr.exe
+          ${{ env.PORTABLE_PACKAGE }}
+
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ github.event.inputs.version && format('v{0}', github.event.inputs.version) || github.ref_name }}
+        name: wthrr ${{ github.event.inputs.version && format('v{0}', github.event.inputs.version) || github.ref_name }}
+        prerelease: ${{ github.event.inputs.prerelease || false }}
+        generate_release_notes: true
+        files: |
+          Src/wthrr/x64/Release/wthrr.exe
+          ${{ env.PORTABLE_PACKAGE }}
+        body: |
+          ## ??? wthrr Desktop Weather Simulation
+          
+          Immersive desktop weather effects with realistic rain, snow, lightning, and puddle formation.
+          
+          ### ?? Download Options
+          - **`wthrr.exe`** - Portable executable (no installation required)
+          - **`wthrr-v${{ env.VERSION }}-portable.zip`** - Complete portable package with documentation
+          
+          ### ? Features
+          - Realistic rain and snow particle physics
+          - Dynamic lightning effects during storms
+          - Interactive puddle formation and evaporation
+          - Multi-monitor support
+          - Customizable weather intensity and colors
+          - Advanced snow wind simulation
+          
+          ### ?? System Requirements
+          - Windows 10 (1903+) or Windows 11
+          - DirectX 11.2 compatible graphics card
+          - 50MB available disk space
+          
+          ### ?? Quick Start
+          1. Download and run `wthrr.exe`
+          2. Right-click the system tray icon ? "Configure"
+          3. Choose your preferred weather type and settings
+          4. Enjoy immersive desktop weather!
+          
+          ### ?? Support & Feedback
+          - **Issues**: [GitHub Issues](https://github.com/todddube/wthrr/issues)
+          - **Discussions**: [GitHub Discussions](https://github.com/todddube/wthrr/discussions)
+          - **Email**: Todd@thedubes.com
+          
+          ---
+          
+          *Creating immersive desktop weather experiences since 2024* ????
+
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

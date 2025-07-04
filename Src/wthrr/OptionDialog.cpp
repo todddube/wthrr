@@ -7,6 +7,12 @@
 
 #include "Resource.h"
 
+// Suppress warnings for Windows API parameters that may be unreferenced
+#pragma warning(push)
+#pragma warning(disable: 4100)  // unreferenced formal parameter
+#pragma warning(disable: 4189)  // local variable is initialized but not referenced
+#pragma warning(disable: 4458)  // declaration hides class member
+
 // Initialize static members
 OptionsDialog* OptionsDialog::pThis{nullptr};
 std::vector<CallBackWindow*> OptionsDialog::subscribers{};
@@ -73,7 +79,7 @@ void OptionsDialog::CenterDialog() const
 {
     // Get primary monitor dimensions
     constexpr std::wstring_view windowClassName = L"window";
-    constexpr std::wstring_view windowTitle = L"let it rain";
+    constexpr std::wstring_view windowTitle = L"wthrr";
     const HWND mainWindow = FindWindow(windowClassName.data(), windowTitle.data());
     
     RECT dialogRect{};
@@ -254,13 +260,13 @@ LRESULT CALLBACK OptionsDialog::DialogProc(const HWND hWnd, const UINT message, 
 			constexpr int PARTICLE_MIN = 5;
 			constexpr int PARTICLE_MAX = 250;
 			SendMessage(GetDlgItem(hWnd, IDC_SLIDER), TBM_SETRANGE, TRUE, MAKELONG(PARTICLE_MIN, PARTICLE_MAX));
-			SendMessage(GetDlgItem(hWnd, IDC_SLIDER), TBM_SETPOS, TRUE, pThis->MaxParticles);
+			SendMessage(GetDlgItem(hWnd, IDC_SLIDER), TBM_SETPOS, TRUE, static_cast<LPARAM>(pThis->MaxParticles));
 			
 			// Wind direction slider (-5 to 5)
 			constexpr int WIND_MIN = -5;
 			constexpr int WIND_MAX = 5;
 			SendMessage(GetDlgItem(hWnd, IDC_SLIDER2), TBM_SETRANGE, TRUE, MAKELONG(WIND_MIN, WIND_MAX));
-			SendMessage(GetDlgItem(hWnd, IDC_SLIDER2), TBM_SETPOS, TRUE, pThis->WindDirection);
+			SendMessage(GetDlgItem(hWnd, IDC_SLIDER2), TBM_SETPOS, TRUE, static_cast<LPARAM>(pThis->WindDirection));
 
 			// Lightning frequency slider (0-100)
 			HWND hLightningFreqSlider = GetDlgItem(hWnd, IDC_SLIDER_LIGHTNING_FREQ);
@@ -269,7 +275,7 @@ LRESULT CALLBACK OptionsDialog::DialogProc(const HWND hWnd, const UINT message, 
 				constexpr int LIGHTNING_FREQ_MIN = 0;
 				constexpr int LIGHTNING_FREQ_MAX = 100;
 				SendMessage(hLightningFreqSlider, TBM_SETRANGE, TRUE, MAKELONG(LIGHTNING_FREQ_MIN, LIGHTNING_FREQ_MAX));
-				SendMessage(hLightningFreqSlider, TBM_SETPOS, TRUE, pThis->LightningFrequency);
+				SendMessage(hLightningFreqSlider, TBM_SETPOS, TRUE, static_cast<LPARAM>(pThis->LightningFrequency));
 			}
 
 			// Lightning intensity slider (0-100)
@@ -279,7 +285,7 @@ LRESULT CALLBACK OptionsDialog::DialogProc(const HWND hWnd, const UINT message, 
 				constexpr int LIGHTNING_INTENSITY_MIN = 0;
 				constexpr int LIGHTNING_INTENSITY_MAX = 100;
 				SendMessage(hLightningIntensitySlider, TBM_SETRANGE, TRUE, MAKELONG(LIGHTNING_INTENSITY_MIN, LIGHTNING_INTENSITY_MAX));
-				SendMessage(hLightningIntensitySlider, TBM_SETPOS, TRUE, pThis->LightningIntensity);
+				SendMessage(hLightningIntensitySlider, TBM_SETPOS, TRUE, static_cast<LPARAM>(pThis->LightningIntensity));
 			}
 			
 			// Enable Snow Wind checkbox
@@ -296,7 +302,7 @@ LRESULT CALLBACK OptionsDialog::DialogProc(const HWND hWnd, const UINT message, 
 				constexpr int SNOW_WIND_INTENSITY_MIN = 0;
 				constexpr int SNOW_WIND_INTENSITY_MAX = 100;
 				SendMessage(hSnowWindIntensitySlider, TBM_SETRANGE, TRUE, MAKELONG(SNOW_WIND_INTENSITY_MIN, SNOW_WIND_INTENSITY_MAX));
-				SendMessage(hSnowWindIntensitySlider, TBM_SETPOS, TRUE, pThis->SnowWindIntensity);
+				SendMessage(hSnowWindIntensitySlider, TBM_SETPOS, TRUE, static_cast<LPARAM>(pThis->SnowWindIntensity));
 			}
 			
 			// Snow wind variability slider (0-100)
@@ -306,7 +312,7 @@ LRESULT CALLBACK OptionsDialog::DialogProc(const HWND hWnd, const UINT message, 
 				constexpr int SNOW_WIND_VARIABILITY_MIN = 0;
 				constexpr int SNOW_WIND_VARIABILITY_MAX = 100;
 				SendMessage(hSnowWindVariabilitySlider, TBM_SETRANGE, TRUE, MAKELONG(SNOW_WIND_VARIABILITY_MIN, SNOW_WIND_VARIABILITY_MAX));
-				SendMessage(hSnowWindVariabilitySlider, TBM_SETPOS, TRUE, pThis->SnowWindVariability);
+				SendMessage(hSnowWindVariabilitySlider, TBM_SETPOS, TRUE, static_cast<LPARAM>(pThis->SnowWindVariability));
 			}
 
 			// Set initial radio button state based on particle type
@@ -554,3 +560,5 @@ void OptionsDialog::NotifySnowWindVariability(const int newValue)
 		}
 	}
 }
+
+#pragma warning(pop)  // Restore warning settings
