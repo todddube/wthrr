@@ -19,7 +19,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 # File paths - Single VersionRC.h approach
-$versionRCPath = "wthrr/VersionRC.h"
+$versionRCPath = "../wthrr/VersionRC.h"
 $readmePath = "../README.md"
 
 # Validate version numbers
@@ -35,7 +35,7 @@ $dialogCaption = "wthrr [v $versionString] - options"
 Write-Host "?? Updating wthrr to version $versionString" -ForegroundColor Green
 Write-Host "   Using Option 2: Single VersionRC.h system" -ForegroundColor Cyan
 
-# Create VersionRC.h content directly with proper UTF-8 encoding
+# Create VersionRC.h content directly with proper UTF-8 encoding and CRLF line endings
 $versionRCContent = @"
 // VersionRC.h - Single Source of Truth for All Version Information
 // This file contains only C preprocessor definitions compatible with both 
@@ -66,6 +66,11 @@ $versionRCContent = @"
 #endif // WTHRR_VERSION_RC_H
 "@
 
+# Ensure proper CRLF line endings for Windows RC compiler compatibility
+$versionRCContent = $versionRCContent -replace "`r`n", "`n" -replace "`n", "`r`n"
+# Add final CRLF to prevent RC1004 "unexpected end of file" error
+$versionRCContent += "`r`n"
+
 # Write the VersionRC.h file with UTF-8 encoding (no BOM for RC compiler compatibility)
 [System.IO.File]::WriteAllText((Resolve-Path $versionRCPath), $versionRCContent, [System.Text.UTF8Encoding]::new($false))
 Write-Host "? Updated $versionRCPath (single source of truth)" -ForegroundColor Green
@@ -81,7 +86,7 @@ if (Test-Path $readmePath) {
 }
 
 # Check if Version.h exists and recommend removal
-$versionHeaderPath = "wthrr/Version.h"
+$versionHeaderPath = "../wthrr/Version.h"
 if (Test-Path $versionHeaderPath) {
     Write-Host "`n??  Option 2 Implementation Note:" -ForegroundColor Yellow
     Write-Host "   Version.h still exists but is no longer needed" -ForegroundColor Yellow
@@ -112,9 +117,10 @@ Write-Host "4. Commit changes: git add . && git commit -m `"Release v$versionStr
 Write-Host "5. Create tag: git tag -a v$versionString -m `"Release v$versionString`"" -ForegroundColor White
 Write-Host "6. Push changes: git push origin main --tags" -ForegroundColor White
 
-Write-Host "`n?? Single-Source Benefits:" -ForegroundColor Cyan
+Write-Host "`n? Single-Source Benefits:" -ForegroundColor Cyan
 Write-Host "   ? No duplicate version definitions" -ForegroundColor White
 Write-Host "   ? Works with both C++ code and Resource Compiler" -ForegroundColor White
 Write-Host "   ? Automatic dialog caption updates" -ForegroundColor White
 Write-Host "   ? Simplified maintenance with this script" -ForegroundColor White
 Write-Host "   ? No file encoding issues" -ForegroundColor White
+Write-Host "   ? Proper CRLF line endings for RC compiler" -ForegroundColor White

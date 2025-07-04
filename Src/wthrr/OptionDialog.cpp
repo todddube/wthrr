@@ -73,7 +73,7 @@ void OptionsDialog::CenterDialog() const
 {
     // Get primary monitor dimensions
     constexpr std::wstring_view windowClassName = L"window";
-    constexpr std::wstring_view windowTitle = L"let it rain";
+    constexpr std::wstring_view windowTitle = L"wthrr";
     const HWND mainWindow = FindWindow(windowClassName.data(), windowTitle.data());
     
     RECT dialogRect{};
