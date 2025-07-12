@@ -1,10 +1,11 @@
-# GitHub Release Automation Script
-# This script creates a GitHub release with proper tagging
+# GitHub Release Automation Script for wthrr
+# This script creates a GitHub release with proper tagging and asset uploading
 # Requires GitHub CLI (gh) to be installed and authenticated
 
+[CmdletBinding()]
 param(
-    [Parameter(Mandatory=$true)]
-    [string]$Version,
+    [Parameter(Mandatory=$false)]
+    [string]$Version = "",
     
     [string]$ReleaseNotes = "",
     
@@ -12,25 +13,94 @@ param(
     
     [switch]$Draft,
     
-    [string]$BinaryPath = "Src/wthrr/x64/Release/wthrr.exe"
+    [string]$BinaryPath = "wthrr/x64/Release/wthrr.exe",
+    
+    [string]$AlternateBinaryPath = "wthrr/Release/wthrr.exe",
+    
+    [switch]$AutoDetectVersion,
+    
+    [switch]$Force,
+    
+    [string]$MSIPath = "",
+    
+    [switch]$CreateMSI,
+    
+    [switch]$SkipBuild
 )
 
 $ErrorActionPreference = "Stop"
+$ProgressPreference = "SilentlyContinue"
+
+# ASCII Art Header
+Write-Host @"
+????????????????????????????????????????????????????????????????
+?                    wthrr Release Manager                     ?
+?        Creating immersive desktop weather experiences        ?
+????????????????????????????????????????????????????????????????
+"@ -ForegroundColor Cyan
+
+function Write-Status {
+    param([string]$Message, [string]$Color = "White")
+    Write-Host "?? $Message" -ForegroundColor $Color
+}
+
+function Write-Success {
+    param([string]$Message)
+    Write-Host "? $Message" -ForegroundColor Green
+}
+
+function Write-Warning {
+    param([string]$Message)
+    Write-Host "??  $Message" -ForegroundColor Yellow
+}
+
+function Write-Error {
+    param([string]$Message)
+    Write-Host "? $Message" -ForegroundColor Red
+}
+
+# Auto-detect version from VersionRC.h if not provided
+if ($AutoDetectVersion -or [string]::IsNullOrEmpty($Version)) {
+    Write-Status "Auto-detecting version from VersionRC.h..."
+    
+    $versionFile = "wthrr/VersionRC.h"
+    if (Test-Path $versionFile) {
+        $content = Get-Content $versionFile
+        $major = ($content | Select-String "#define WTHRR_VERSION_MAJOR\s+(\d+)").Matches[0].Groups[1].Value
+        $minor = ($content | Select-String "#define WTHRR_VERSION_MINOR\s+(\d+)").Matches[0].Groups[1].Value
+        $patch = ($content | Select-String "#define WTHRR_VERSION_PATCH\s+(\d+)").Matches[0].Groups[1].Value
+        
+        if ($major -and $minor -and $patch) {
+            $Version = "$major.$minor.$patch"
+            Write-Success "Detected version: v$Version"
+        } else {
+            Write-Error "Could not parse version from VersionRC.h"
+            exit 1
+        }
+    } else {
+        Write-Error "VersionRC.h not found at $versionFile"
+        exit 1
+    }
+}
 
 # Validate version format
 if ($Version -notmatch '^\d+\.\d+\.\d+$') {
-    Write-Error "Version must be in format X.Y.Z (e.g., 2.0.4)"
+    Write-Error "Version must be in format X.Y.Z (e.g., 0.7.4)"
     exit 1
 }
 
 $tagName = "v$Version"
 $releaseName = "wthrr v$Version"
 
-Write-Host "Creating GitHub release for $releaseName" -ForegroundColor Green
+Write-Status "Preparing GitHub release for $releaseName" "Cyan"
+
+# Check prerequisites
+Write-Status "Checking prerequisites..."
 
 # Check if gh CLI is available
 try {
-    gh --version | Out-Null
+    $ghVersion = gh --version 2>$null
+    Write-Success "GitHub CLI found: $($ghVersion[0])"
 } catch {
     Write-Error "GitHub CLI (gh) is not installed. Please install it from https://cli.github.com/"
     exit 1
@@ -42,97 +112,6 @@ if (-not (Test-Path ".git")) {
     exit 1
 }
 
-# Generate release notes if not provided
-if (-not $ReleaseNotes) {
-    Write-Host "Generating release notes from recent commits..." -ForegroundColor Yellow
-    
-    $ReleaseNotes = @"
-## ?? What's New in v$Version
-
-### ? Features & Improvements
-$(git log --oneline --since="30 days ago" --grep="feat:" --grep="add:" --grep="new:" | ForEach-Object { "- $_" } | Out-String)
-
-### ?? Bug Fixes
-$(git log --oneline --since="30 days ago" --grep="fix:" --grep="bug:" | ForEach-Object { "- $_" } | Out-String)
-
-### ?? Technical Changes
-$(git log --oneline --since="30 days ago" --grep="refactor:" --grep="improve:" --grep="update:" | ForEach-Object { "- $_" } | Out-String)
-
-### ?? Full Changelog
-See all changes: [v$Version...main](https://github.com/todddube/wthrr/compare/v$Version...main)
-
----
-
-## ?? Installation
-
-### Windows Installer
-Download the MSI installer from the assets below for the easiest installation experience.
-
-### Portable Executable
-Download `wthrr.exe` for a portable version that doesn't require installation.
-
-### System Requirements
-- Windows 10 (1903+) / Windows 11
-- DirectX 11.2 compatible graphics card
-- 50MB available disk space
-
-## ?? Quick Start
-1. Install or extract wthrr
-2. Launch from Start Menu or run `wthrr.exe`
-3. Right-click the system tray icon to configure settings
-4. Enjoy immersive desktop weather effects!
-
-## ?? Support
-- **Report Issues**: [GitHub Issues](https://github.com/todddube/wthrr/issues)
-- **Documentation**: [Project Wiki](https://github.com/todddube/wthrr/wiki)
-- **Contact**: Todd@thedubes.com
-"@
-}
-
-# Check if binary exists
-if ($BinaryPath -and (Test-Path $BinaryPath)) {
-    $binarySize = (Get-Item $BinaryPath).Length
-    $binarySizeMB = [math]::Round($binarySize / 1MB, 2)
-    Write-Host "? Found binary at $BinaryPath ($binarySizeMB MB)" -ForegroundColor Green
-    $assetArgs = @("--attach", $BinaryPath)
-} else {
-    Write-Warning "Binary not found at $BinaryPath - creating release without assets"
-    $assetArgs = @()
-}
-
-# Build command arguments
-$ghArgs = @(
-    "release", "create", $tagName,
-    "--title", $releaseName,
-    "--notes", $ReleaseNotes
-)
-
-if ($PreRelease) {
-    $ghArgs += "--prerelease"
-}
-
-if ($Draft) {
-    $ghArgs += "--draft"
-}
-
-$ghArgs += $assetArgs
-
+# Check authentication
 try {
-    # Create the release
-    Write-Host "Creating release..." -ForegroundColor Yellow
-    & gh @ghArgs
-    
-    Write-Host "`n?? Release created successfully!" -ForegroundColor Green
-    Write-Host "View your release: https://github.com/todddube/wthrr/releases/tag/$tagName" -ForegroundColor Cyan
-    
-    # Additional MSI creation suggestion
-    Write-Host "`n?? Next Steps:" -ForegroundColor Yellow
-    Write-Host "1. Consider creating an MSI installer using WiX Toolset" -ForegroundColor White
-    Write-Host "2. Add release to Microsoft Store (if desired)" -ForegroundColor White
-    Write-Host "3. Update project documentation" -ForegroundColor White
-    Write-Host "4. Announce on social media/forums" -ForegroundColor White
-    
-} catch {
-    Write-Error "Failed to create release: $_"
-    exit 1
-}
+    $user =

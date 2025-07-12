@@ -505,38 +505,7 @@ void SnowFlake::DrawStarSnowflake(ID2D1DeviceContext* dc, D2D1_POINT_2F center, 
 
 void SnowFlake::DrawSettledSnow2(ID2D1DeviceContext* dc, const DisplayData* pDispData)
 {
-	for (int y = pDispData->Height - 1; y >= pDispData->MaxSnowHeight; --y)
-	{
-		for (int x = 0; x < pDispData->Width; ++x)
-		{
-			if (pDispData->pScenePixels[x + y * pDispData->Width] == SNOW_COLOR)
-			{
-				const int normX = x + pDispData->SceneRect.left;
-				const int normY = y + pDispData->SceneRect.top;
-				const float halfWidth = pDispData->ScaleFactor >= 1 ? pDispData->ScaleFactor : 1;
-
-				D2D1_RECT_F rect = D2D1::RectF(
-					normX - halfWidth,
-					normY - halfWidth,
-					normX + halfWidth,
-					normY + halfWidth);
-				dc->FillRectangle(rect, pDispData->DropColorBrush.Get());
-
-				// Define the ellipse with center at (posX, posY) and radius 5px
-				D2D1_ELLIPSE ellipse = D2D1::Ellipse(
-                    D2D1::Point2F(static_cast<float>(normX), static_cast<float>(normY + y)), 
-                    5.0f, 
-                    5.0f);
-
-				// Draw the ellipse
-				dc->FillEllipse(ellipse, pDispData->DropColorBrush.Get());
-			}
-		}
-	}
-}
-
-void SnowFlake::DrawSettledSnow(ID2D1DeviceContext* dc, const DisplayData* pDispData)
-{
+	// Hybrid approach: Efficient run-length encoding with selective visual enhancements
 	for (int y = pDispData->Height - 1; y >= pDispData->MaxSnowHeight; --y)
 	{
 		int startX = -1; // Start of the run of SNOW_COLOR pixels
@@ -558,15 +527,102 @@ void SnowFlake::DrawSettledSnow(ID2D1DeviceContext* dc, const DisplayData* pDisp
 					const int normY = y + pDispData->SceneRect.top;
 					const float halfWidth = pDispData->ScaleFactor >= 1 ? pDispData->ScaleFactor : 1;
 
-					// rect settle snow
+					 // Draw the efficient rectangular run for the base snow layer
 					D2D1_RECT_F rect = D2D1::RectF(
 						normXStart - halfWidth,
 						normY - halfWidth,
 						normXEnd + halfWidth,
 						normY + halfWidth
 					);
-
 					dc->FillRectangle(rect, pDispData->DropColorBrush.Get());
+
+					// Add selective visual enhancements for better appearance
+					const int runLength = x - startX + 1;
+					
+					// Add ellipse details for short runs (individual pixels or small clusters)
+					// This gives isolated snow pixels more character
+					if (runLength <= 3)
+					{
+						for (int px = startX; px <= x; ++px)
+						{
+							const int normPxX = px + pDispData->SceneRect.left;
+							
+							// Add small ellipse for texture on small snow clusters
+							D2D1_ELLIPSE ellipse = D2D1::Ellipse(
+								D2D1::Point2F(static_cast<float>(normPxX), static_cast<float>(normY)), 
+								1.5f * pDispData->ScaleFactor, 
+								1.5f * pDispData->ScaleFactor);
+							dc->FillEllipse(ellipse, pDispData->DropColorBrush.Get());
+						}
+					}
+					// Add edge highlights for longer runs to create depth
+					else if (runLength > 8)
+					{
+						// Add elliptical highlights at the start and end of long runs
+						// This creates visual interest on snow banks and drifts
+						
+						// Left edge highlight
+						D2D1_ELLIPSE leftEllipse = D2D1::Ellipse(
+							D2D1::Point2F(static_cast<float>(normXStart), static_cast<float>(normY)), 
+							2.0f * pDispData->ScaleFactor, 
+							2.0f * pDispData->ScaleFactor);
+						dc->FillEllipse(leftEllipse, pDispData->DropColorBrush.Get());
+						
+						// Right edge highlight
+						D2D1_ELLIPSE rightEllipse = D2D1::Ellipse(
+							D2D1::Point2F(static_cast<float>(normXEnd), static_cast<float>(normY)), 
+							2.0f * pDispData->ScaleFactor, 
+							2.0f * pDispData->ScaleFactor);
+						dc->FillEllipse(rightEllipse, pDispData->DropColorBrush.Get());
+						
+						// Add occasional mid-run highlights for very long stretches
+						if (runLength > 20)
+						{
+							// Add 1-2 random highlights along the run for texture
+							auto& rng = RandomGenerator::GetInstance();
+							const int numHighlights = 1 + (runLength > 40 ? 1 : 0);
+							
+							for (int h = 0; h < numHighlights; ++h)
+							{
+								const int highlightX = startX + rng.GenerateInt(3, runLength - 3);
+								const int normHighlightX = highlightX + pDispData->SceneRect.left;
+								
+								D2D1_ELLIPSE highlight = D2D1::Ellipse(
+									D2D1::Point2F(static_cast<float>(normHighlightX), static_cast<float>(normY)), 
+									1.8f * pDispData->ScaleFactor, 
+									1.8f * pDispData->ScaleFactor);
+								dc->FillEllipse(highlight, pDispData->DropColorBrush.Get());
+							}
+						}
+					}
+
+					// Add surface detail for exposed top surfaces
+					// Check if this is a top surface (air above) for additional texture
+					if (y > pDispData->MaxSnowHeight && 
+						(y - 1 < 0 || y - 1 >= pDispData->Height || 
+						 pDispData->pScenePixels[startX + (y - 1) * pDispData->Width] == AIR_COLOR))
+					{
+						// This is a top surface - add subtle texture variation
+						auto& rng = RandomGenerator::GetInstance();
+						
+						// Randomly add small surface details every few pixels
+						for (int sx = startX; sx <= x; sx += 2 + rng.GenerateInt(0, 3))
+						{
+							if (rng.GenerateInt(0, 100) < 30) // 30% chance for surface detail
+							{
+								const int normSurfaceX = sx + pDispData->SceneRect.left;
+								
+								// Small surface bump/detail
+								D2D1_ELLIPSE surfaceDetail = D2D1::Ellipse(
+									D2D1::Point2F(
+										static_cast<float>(normSurfaceX), 
+										static_cast<float>(normY - 0.5f)), 
+									1.2f * pDispData->ScaleFactor, 
+									0.8f * pDispData->ScaleFactor);
+								dc->FillEllipse(surfaceDetail, pDispData->DropColorBrush.Get());
+							}
+						}
+					}
 
 					// Reset startX for the next run
 					startX = -1;

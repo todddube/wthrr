@@ -18,7 +18,7 @@
 // Application information
 #define WTHRR_APP_NAME          "wthrr"
 #define WTHRR_COMPANY_NAME      "Todd Dube"
-#define WTHRR_DESCRIPTION       "Immersive desktop weather simulation for Windows"
+#define WTHRR_DESCRIPTION       "Weather simulation for Windows"
 #define WTHRR_COPYRIGHT         "Copyright (C) 2025 Todd Dube"
 
 // Dialog caption with version - AUTOMATICALLY MAINTAINED BY SCRIPTS

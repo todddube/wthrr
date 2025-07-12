@@ -3,6 +3,9 @@
 // Callback function to be called for each display
 inline BOOL CALLBACK MonitorEnumProc(const HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, const LPARAM lParam)
 {
+	// Explicitly mark lprcMonitor as used to suppress the warning
+	(void)lprcMonitor;
+
 	std::vector<MonitorData>* monitorDataList = reinterpret_cast<std::vector<MonitorData>*>(lParam);
 	MONITORINFOEX monitorInfo;
 	monitorInfo.cbSize = sizeof(monitorInfo);

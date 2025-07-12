@@ -13,7 +13,7 @@ public:
 	void UpdatePosition(float deltaSeconds);
 	static void SettleSnow(const DisplayData* pDispData);
 	void Draw(ID2D1DeviceContext* dc) const;
-	static void DrawSettledSnow(ID2D1DeviceContext* dc, const DisplayData* pDispData);
+	// Hybrid approach combining efficiency of DrawSettledSnow with visual enhancements
 	static void DrawSettledSnow2(ID2D1DeviceContext* dc, const DisplayData* pDispData);
 	
 	// Apply wind to the snowflake's velocity
